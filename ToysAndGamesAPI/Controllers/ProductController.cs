@@ -72,8 +72,8 @@ namespace ToysAndGamesAPI.Controllers
                 if (!string.IsNullOrEmpty(product.UrlImage))
                 {
                     RemoveImage(product.UrlImage);
+                    product.UrlImage = "";
                 }
-                product.UrlImage = "";
             }
             RemoveQuotes(ref product);
             bool transactionSuccesfullyExecuted = repository.AddOrUpdate(product);

@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 namespace DataAccess.Repositories
 {
     public class ProductBR
-    {
-        public static void HandleCompany(Company[] companies,ref Product payload)
+    {   
+        //Add Company?
+        public static bool HandleCompany(Company[] companies,ref Product payload)
         {
             Product payloadAux = payload;
             
@@ -19,7 +20,9 @@ namespace DataAccess.Repositories
             {
                 payload.CompanyId = repeatedCompany.Id;
                 payload.Company = null;
+                return false;
             }
+            return true;
 
 
         }

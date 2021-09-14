@@ -32,8 +32,11 @@ namespace DataAccess
                 {
                     Product p = model as Product;
                     
-                    ProductBR.HandleCompany(dbContext.Companies.AsNoTracking().ToArray(), ref p);
-                    
+                    bool addCompany = ProductBR.HandleCompany(dbContext.Companies.AsNoTracking().ToArray(), ref p);
+                    if (addCompany)
+                    {
+                        dbContext.Companies.Add(p.Company);
+                    }
                 }
                 if (!isUpdateTran)
                 {
