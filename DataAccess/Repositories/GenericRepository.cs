@@ -27,13 +27,16 @@ namespace DataAccess
 
             try
             {
-                
+
                 if (type == typeof(Product))
                 {
                     Product p = model as Product;
-                    
-                    ProductBR.HandleCompany(dbContext.Companies.AsNoTracking().ToArray(), ref p);
-                    
+
+                    bool addCompany = ProductBR.HandleCompany(dbContext.Companies.AsNoTracking().ToArray(), ref p);
+                    if (addCompany)
+                    {
+                        dbContext.Companies.Add(p.Company);
+                    }
                 }
                 if (!isUpdateTran)
                 {
@@ -91,7 +94,7 @@ namespace DataAccess
                 }
                 if (type == typeof(Company))
                 {
-                    
+
                 }
                 dbContext.SaveChanges();
             }

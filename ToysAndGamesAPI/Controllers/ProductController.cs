@@ -11,7 +11,7 @@ using System.IO;
 
 namespace ToysAndGamesAPI.Controllers
 {
-   
+
     [Route("api/[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -19,10 +19,10 @@ namespace ToysAndGamesAPI.Controllers
         private IRepository<Product> repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IWebHostEnvironment hostingEnv;
-        public ProductController(ILogger<ProductController> logger,MainDBContext dbContext, IRepository<Product> repository, IWebHostEnvironment hostingEnv)
+        public ProductController(ILogger<ProductController> logger, MainDBContext dbContext, IRepository<Product> repository, IWebHostEnvironment hostingEnv)
         {
             this.repository = repository;
-            repository.Init(dbContext,typeof(Product));
+            repository.Init(dbContext, typeof(Product));
             _logger = logger;
             this.hostingEnv = hostingEnv;
 
@@ -49,17 +49,17 @@ namespace ToysAndGamesAPI.Controllers
                     System.IO.File.Delete(path);
                 }
             }
-            catch(Exception err)
+            catch (Exception err)
             {
 
             }
-            
+
         }
         [HttpPost]
         public ActionResult Post([FromForm] Product product)
         {
             product.LastModification = DateTime.Now;
-            if(product.Image != null)
+            if (product.Image != null)
             {
                 string path = SaveImage(product);
                 if (path.Length > 0)
@@ -72,8 +72,8 @@ namespace ToysAndGamesAPI.Controllers
                 if (!string.IsNullOrEmpty(product.UrlImage))
                 {
                     RemoveImage(product.UrlImage);
+                    product.UrlImage = "";
                 }
-                product.UrlImage = "";
             }
             RemoveQuotes(ref product);
             bool transactionSuccesfullyExecuted = repository.AddOrUpdate(product);
@@ -97,7 +97,7 @@ namespace ToysAndGamesAPI.Controllers
                 }
                 return Path.Combine(pathContainer, fileName);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 return "";
             }
@@ -112,6 +112,6 @@ namespace ToysAndGamesAPI.Controllers
             else
                 return NotFound();
         }
-      
+
     }
 }
