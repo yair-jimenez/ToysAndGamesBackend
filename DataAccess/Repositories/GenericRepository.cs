@@ -12,59 +12,63 @@ namespace DataAccess
 {
     public class GenericRepository<T> : IRepository<T> where T : BaseModel, new()
     {
-        private MainDBContext dbContext;
+        protected MainDBContext dbContext;
         private Type type;
+        private ITransactionBR transactionBR;
         public void Init(MainDBContext dbContext, Type type)
         {
             this.dbContext = dbContext;
             this.type = type;
+        }
+        private void PreValidate(T model)
+        {
+            if (type == typeof(Product))
+            {
+                Product p = model as Product;
+                transactionBR = new ProductBR(dbContext);
+                transactionBR.ValidateDependecies(p);
+            }
+        }
+        private void Add(T model)
+        {
+            dbContext.Add(model);
+            dbContext.Entry(model).State = EntityState.Added;
+        }
+        private bool Update(T model)
+        {
+            bool executeTran = false;
+            if (type == typeof(Product))
+            {
+                transactionBR = new ProductBR(dbContext);
+                executeTran = transactionBR.Update(model as Product);
+            }
+            if (type == typeof(Company))
+            {
+                transactionBR = new SizeBR(dbContext);
+                executeTran = transactionBR.Update(model as Size);
+            }
+            if (type == typeof(SizeShoes))
+            {
+                transactionBR = new SizesProductsBR(dbContext);
+                executeTran = transactionBR.Update(model as SizeShoes);
+            }
+            return executeTran;
         }
         public bool AddOrUpdate(T model)
         {
             bool rowAffected = true;
             bool isUpdateTran = (model.Id > 0);
             bool executeTran = true;
-
             try
             {
-                
-                if (type == typeof(Product))
-                {
-                    Product p = model as Product;
-                    
-                    bool addCompany = ProductBR.HandleCompany(dbContext.Companies.AsNoTracking().ToArray(), ref p);
-                    if (addCompany)
-                    {
-                        dbContext.Companies.Add(p.Company);
-                    }
-                }
+                PreValidate(model);
                 if (!isUpdateTran)
                 {
-                    dbContext.Add(model);
-                    dbContext.Entry(model).State = EntityState.Added;
-
-
+                    Add(model);
                 }
                 else
                 {
-                    bool exist = false;
-                    if (type == typeof(Product))
-                    {
-                        Product pr = dbContext.Products.AsNoTracking().Where(p => p.Id == model.Id).FirstOrDefault();
-                        exist = pr != null;
-                        executeTran = exist;
-                        if (exist)
-                        {
-                            pr = model as Product;
-                            dbContext.Entry(pr).State = EntityState.Modified;
-                        }
-
-                    }
-                    if (type == typeof(Company))
-                    {
-
-                    }
-
+                    executeTran = Update(model);
                 }
                 rowAffected = executeTran;
                 if (executeTran)
@@ -77,25 +81,25 @@ namespace DataAccess
             return rowAffected;
         }
 
-        public bool Delete(int Id)
+        public bool Delete(object Id)
         {
             bool transactionSuccesfully = true;
             try
             {
                 if (type == typeof(Product))
                 {
-                    Product pr = dbContext.Products.Where(p => p.Id == Id).FirstOrDefault();
-                    if (pr != null)
-                    {
-                        dbContext.Remove(pr);
-                        dbContext.Entry(pr).State = EntityState.Deleted;
-                    }
+                    transactionBR = new ProductBR(dbContext);
 
                 }
                 if (type == typeof(Company))
                 {
-                    
+                    transactionBR = new SizeBR(dbContext);
                 }
+                if (type == typeof(SizeShoes))
+                {
+                    transactionBR = new SizesProductsBR(dbContext);
+                }
+                transactionBR.DeleteModel(Id);
                 dbContext.SaveChanges();
             }
             catch (Exception err)
@@ -117,6 +121,14 @@ namespace DataAccess
                 if (type == typeof(Company))
                 {
                     return dbContext.Companies.ToList() as List<T>;
+                }
+                if (type == typeof(Size))
+                {
+                    return dbContext.Sizes.ToList() as List<T>;
+                }
+                if (type == typeof(SizeShoes))
+                {
+                    return dbContext.SizeProduct.ToList() as List<T>;
                 }
             }
             catch (Exception err)

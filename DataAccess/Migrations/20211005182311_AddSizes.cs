@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DataAccess.Migrations
 {
-    public partial class ignoreReferencialObj : Migration
+    public partial class AddSizes : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -23,6 +23,20 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Sizes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ShoeSize = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    LastModification = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sizes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -30,10 +44,12 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    AgeRestriction = table.Column<int>(type: "int", precision: 3, nullable: false, defaultValue: 0),
                     UrlImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false),
+                    IsAvaible = table.Column<bool>(type: "bit", nullable: false),
+                    InStock = table.Column<int>(type: "int", nullable: false),
+                    SizeId = table.Column<int>(type: "int", nullable: false),
                     LastModification = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -47,36 +63,56 @@ namespace DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SizeProduct",
+                columns: table => new
+                {
+                    SizeId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SizeProduct", x => new { x.ProductId, x.SizeId });
+                    table.ForeignKey(
+                        name: "FK_SizeProduct_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SizeProduct_Sizes_SizeId",
+                        column: x => x.SizeId,
+                        principalTable: "Sizes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Companies",
                 columns: new[] { "Id", "Addres", "LastModification", "Name" },
-                values: new object[] { 1, "", new DateTime(2021, 9, 10, 22, 29, 11, 738, DateTimeKind.Local).AddTicks(1261), "Mattel" });
-
-            migrationBuilder.InsertData(
-                table: "Products",
-                columns: new[] { "Id", "AgeRestriction", "CompanyId", "Description", "LastModification", "Name", "Price", "UrlImage" },
-                values: new object[] { 1, 5, 1, "Racing Model 1991", new DateTime(2021, 9, 10, 22, 29, 11, 721, DateTimeKind.Local).AddTicks(4052), "HotWheels Model 1", 10.50m, "" });
-
-            migrationBuilder.InsertData(
-                table: "Products",
-                columns: new[] { "Id", "AgeRestriction", "CompanyId", "Description", "LastModification", "Name", "Price", "UrlImage" },
-                values: new object[] { 2, 3, 1, "Racing Model 1991", new DateTime(2021, 9, 10, 22, 29, 11, 724, DateTimeKind.Local).AddTicks(3173), "HotWheels Model 2", 100.50m, "" });
-
-            migrationBuilder.InsertData(
-                table: "Products",
-                columns: new[] { "Id", "AgeRestriction", "CompanyId", "Description", "LastModification", "Name", "Price", "UrlImage" },
-                values: new object[] { 3, 3, 1, "Racing Model 1992", new DateTime(2021, 9, 10, 22, 29, 11, 724, DateTimeKind.Local).AddTicks(3216), "HotWheels Model 3", 69.50m, "" });
+                values: new object[] { 1, "", new DateTime(2021, 10, 5, 13, 23, 10, 844, DateTimeKind.Local).AddTicks(9637), "Mattel" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CompanyId",
                 table: "Products",
                 column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SizeProduct_SizeId",
+                table: "SizeProduct",
+                column: "SizeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "SizeProduct");
+
+            migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Sizes");
 
             migrationBuilder.DropTable(
                 name: "Companies");

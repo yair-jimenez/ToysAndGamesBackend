@@ -8,6 +8,8 @@ namespace DataAccess.DBContext
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<Size> Sizes { get; set; }
+        public DbSet<SizeShoes> SizeProduct { get; set; }
         public MainDBContext(DbContextOptions<MainDBContext> option) : base(option)
         {
 
@@ -16,6 +18,8 @@ namespace DataAccess.DBContext
         {
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+            modelBuilder.ApplyConfiguration(new SizeShoesConfiguration());
+            modelBuilder.ApplyConfiguration(new SizeConfiguration());
         }
     }
 }

@@ -47,7 +47,7 @@ namespace DataAccess.Migrations
                         {
                             Id = 1,
                             Addres = "",
-                            LastModification = new DateTime(2021, 9, 14, 9, 12, 45, 688, DateTimeKind.Local).AddTicks(940),
+                            LastModification = new DateTime(2021, 10, 5, 13, 23, 10, 844, DateTimeKind.Local).AddTicks(9637),
                             Name = "Mattel"
                         });
                 });
@@ -59,18 +59,18 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int>("AgeRestriction")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(3)
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("InStock")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAvaible")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("LastModification")
                         .HasColumnType("datetime2");
@@ -84,6 +84,9 @@ namespace DataAccess.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<int>("SizeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UrlImage")
                         .HasColumnType("nvarchar(max)");
 
@@ -92,41 +95,39 @@ namespace DataAccess.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Products");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AgeRestriction = 5,
-                            CompanyId = 1,
-                            Description = "Racing Model 1991",
-                            LastModification = new DateTime(2021, 9, 14, 9, 12, 45, 680, DateTimeKind.Local).AddTicks(1526),
-                            Name = "HotWheels Model 1",
-                            Price = 10.50m,
-                            UrlImage = ""
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AgeRestriction = 3,
-                            CompanyId = 1,
-                            Description = "Racing Model 1991",
-                            LastModification = new DateTime(2021, 9, 14, 9, 12, 45, 682, DateTimeKind.Local).AddTicks(3263),
-                            Name = "HotWheels Model 2",
-                            Price = 100.50m,
-                            UrlImage = ""
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AgeRestriction = 3,
-                            CompanyId = 1,
-                            Description = "Racing Model 1992",
-                            LastModification = new DateTime(2021, 9, 14, 9, 12, 45, 682, DateTimeKind.Local).AddTicks(3293),
-                            Name = "HotWheels Model 3",
-                            Price = 69.50m,
-                            UrlImage = ""
-                        });
+            modelBuilder.Entity("Models.Size", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<DateTime>("LastModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ShoeSize")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sizes");
+                });
+
+            modelBuilder.Entity("Models.SizeShoes", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SizeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "SizeId");
+
+                    b.HasIndex("SizeId");
+
+                    b.ToTable("SizeProduct");
                 });
 
             modelBuilder.Entity("Models.Product", b =>
@@ -138,6 +139,30 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Models.SizeShoes", b =>
+                {
+                    b.HasOne("Models.Product", "Product")
+                        .WithMany("SizeShoes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Size", "Size")
+                        .WithMany()
+                        .HasForeignKey("SizeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Size");
+                });
+
+            modelBuilder.Entity("Models.Product", b =>
+                {
+                    b.Navigation("SizeShoes");
                 });
 #pragma warning restore 612, 618
         }

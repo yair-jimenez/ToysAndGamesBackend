@@ -12,7 +12,7 @@ namespace DataAccess.Contracts
     {
         void Init(MainDBContext dbContext, Type type);
         bool AddOrUpdate(T model);
-        bool Delete(int Id);
+        bool Delete(object Id);
         List<T> Get();
 
 
